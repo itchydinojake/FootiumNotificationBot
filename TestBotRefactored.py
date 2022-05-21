@@ -137,7 +137,7 @@ async def on_message(message):
         previous = False
         for user in signed_up:
             if user[0] == message.author:
-                await message.channel.send("you have already signed up!!" + user)
+                await message.channel.send("you have already signed up!!" + message.author.name)
                 previous = True
                 #signed_up.remove(user)
                 print(user)
