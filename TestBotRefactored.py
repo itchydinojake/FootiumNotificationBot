@@ -3,8 +3,8 @@ import os
 import requests
 import json
 from discord.ext import tasks
-import time
-from threading import Thread
+import datetime
+from datetime import date
 
 TOKEN = os.getenv('DISCORD_TOKEN')
 graphqlUrl = 'https://footium.club/beta/api/graphql'
@@ -12,8 +12,6 @@ graphqlUrl = 'https://footium.club/beta/api/graphql'
 client = discord.Client()
 
 signed_up = []
-
-roundIndex = 10
 
 getMatchDetails = """query getMatchDetails($tId: Int!, $rId: Int!, $fId: Int!) {
   liveMatch(tournamentId: $tId, roundIndex: $rId, fixtureIndex: $fId) {
@@ -50,6 +48,7 @@ getTIDfromclubID = """
 
 @tasks.loop(seconds = 10) # repeat after every 10 seconds
 async def myLoop():
+    roundIndex = checkandupdateRoundIndex()
     for user in signed_up:
         #print(str(user))
         for i in range(0,6):
@@ -62,10 +61,10 @@ async def myLoop():
                 # await message.channel.send("Error Checking api")
                 print(r.status_code)
                 quit()
+
             # loads data into python object
             data = json.loads(r.content)
             liveMatch = data['data']['liveMatch']
-
 
             #print("home: "+ str(liveMatch['params']['homeClub']) + " VS " + str(user[1]) + " away: "+ str(liveMatch['params']['awayClub']['id'])+ " VS " + str(user[1]) )
             if liveMatch['params']['homeClub']['id'] == user[1]['id'] or user[1]['id'] == liveMatch['params']['awayClub']['id']:
@@ -78,7 +77,7 @@ async def myLoop():
                 elif liveMatch['matchTime'] == "1":
                     messageContent = ("Kick off!!! This is bound to be a interesting battle between " + homeClubName + " and " + awayClubName)
                 elif liveMatch['matchTime'] == "HT":
-                    messageContent = ("QUICk it's half time, the score is " + formatScore(homeClubName,liveMatch['homeScorers'],awayClubName,liveMatch['awayScorers']) + ", theres time to update your tatics here: \n https://footium.club/beta/clubs/" + str(user[1]) + "/tactics")
+                    messageContent = ("QUICK it's half time, the score is " + formatScore(homeClubName,liveMatch['homeScorers'],awayClubName,liveMatch['awayScorers']) + ", theres time to update your tatics here: \n https://footium.club/beta/clubs/" + str(user[1]['id']) + "/tactics")
                 elif liveMatch['matchTime'] == "FT":
                     messageContent = ("Quality Match, Final score of: " + formatScore(homeClubName,liveMatch['homeScorers'],awayClubName,liveMatch['awayScorers']))
                 else:
@@ -87,6 +86,7 @@ async def myLoop():
                     pass
                 else:
                     await user[0].send(messageContent)
+
 @client.event
 async def on_ready():
     print("{0.user} is online!".format(client))
@@ -94,8 +94,14 @@ async def on_ready():
 @client.event
 async def on_message(message):
     #ignores own messages
-    if message.author == client.user or message.channel != discord.DMChannel:
+    if message.author == client.user:
+        #print("this:" + str(message.guild))
         return
+    elif message.guild is not None:
+        #message.channel.send("DM the bot ser!!")
+        await message.reply("DM the bot ser!!")
+        return
+
     # testing
     # print(message.author.name + " sent " + message.content)
     try:
@@ -111,7 +117,15 @@ async def on_message(message):
             await message.channel.send("Not valid club ID")
 
     except ValueError:
-        await message.channel.send("Not valid club ID")
+        if message.content == "x":
+            for user in signed_up:
+                if user[0] == message.author:
+                    signed_up.remove(user)
+                    await message.reply("you have been un-subscribed from the bot!")
+            return
+        else:
+            await message.channel.send("Not valid club ID")
+            return
 
     # loads data into python object
     data = json.loads(r.content)
@@ -137,13 +151,13 @@ async def on_message(message):
         previous = False
         for user in signed_up:
             if user[0] == message.author:
-                await message.channel.send("you have already signed up!! " + message.author.name)
+                await message.reply("you have already signed up!! " + message.author.name + ", send a 'x' to remove your previous club subscription!")
                 previous = True
                 #signed_up.remove(user)
                 print(user)
 
         if previous == False:
-            await message.channel.send("Thank you, "+ message.author.name + " ,you have signed up with club " + club['name'] + " in tournament " + str(tID) + "!!")
+            await message.reply("Thank you, "+ message.author.name + " ,you have signed up with club " + club['name'] + " in tournament " + str(tID) + "!!")
             sign_up = [message.author, club, tID]
             signed_up.append(sign_up)
 
@@ -166,6 +180,13 @@ def getClubDetails(clubID):
     data = json.loads(r.content)
     club = data['data']['club']
     return club
+
+def checkandupdateRoundIndex():
+    startDate = date(2022,5,12)
+    today = datetime.datetime.today().date()
+    #print(str((today-startDate).days))
+    roundIndex = (today-startDate).days
+    return roundIndex
 
 myLoop.start()
 
