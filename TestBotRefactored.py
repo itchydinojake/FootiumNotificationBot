@@ -49,6 +49,7 @@ getTIDfromclubID = """
 @tasks.loop(seconds = 10) # repeat after every 10 seconds
 async def myLoop():
     roundIndex = checkandupdateRoundIndex()
+    #print(roundIndex)
     for user in signed_up:
         #print(str(user))
         for i in range(0,6):
