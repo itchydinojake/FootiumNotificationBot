@@ -13,7 +13,7 @@ client = discord.Client()
 
 signed_up = []
 
-roundIndex = 9
+roundIndex = 10
 
 getMatchDetails = """query getMatchDetails($tId: Int!, $rId: Int!, $fId: Int!) {
   liveMatch(tournamentId: $tId, roundIndex: $rId, fixtureIndex: $fId) {
@@ -74,7 +74,7 @@ async def myLoop():
                 prevMessage = await user[0].dm_channel.history(limit=1).flatten()
                 messageContent = ""
                 if liveMatch['matchTime'] == "15:00":
-                    messageContent = ("https://footium.club/beta/tournaments/" + str(user[2]) + "/match/" + str(roundIndex) + "/" + str(i) + "\n https://footium.club/beta/clubs/" + str(user[1]['id']) + "/tactics")
+                    messageContent = ("https://footium.club/beta/tournaments/" + str(user[2]) + "/match/" + str(roundIndex) + "/" + str(i) + "\nhttps://footium.club/beta/clubs/" + str(user[1]['id']) + "/tactics")
                 elif liveMatch['matchTime'] == "1":
                     messageContent = ("Kick off!!! This is bound to be a interesting battle between " + homeClubName + " and " + awayClubName)
                 elif liveMatch['matchTime'] == "HT":
@@ -94,7 +94,7 @@ async def on_ready():
 @client.event
 async def on_message(message):
     #ignores own messages
-    if message.author == client.user:
+    if message.author == client.user or message.channel != discord.DMChannel:
         return
     # testing
     # print(message.author.name + " sent " + message.content)
@@ -137,7 +137,7 @@ async def on_message(message):
         previous = False
         for user in signed_up:
             if user[0] == message.author:
-                await message.channel.send("you have already signed up!!" + message.author.name)
+                await message.channel.send("you have already signed up!! " + message.author.name)
                 previous = True
                 #signed_up.remove(user)
                 print(user)
