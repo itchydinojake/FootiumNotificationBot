@@ -11,7 +11,7 @@ graphqlUrl = 'https://footium.club/beta/api/graphql'
 
 client = discord.Client()
 
-version = "0.1"
+version = "0.2"
 
 signed_up = []
 
@@ -78,7 +78,7 @@ async def myLoop():
                 prevMessage = await user[0].dm_channel.history(limit=1).flatten()
                 messageContent = ""
                 if liveMatch['matchTime'] == "15:00":
-                    messageContent = ("Your next game is " + homeClubName + "(H) vs " + awayClubName + "(A) you can click this link to see it:\nhttps://footium.club/beta/tournaments/" + str(user[2]) + "/match/" + str(roundIndex) + "/" + str(i) + "\nand update tatics here:\nhttps://footium.club/beta/clubs/" + str(user[1]['id']) + "/tactics")
+                    messageContent = ("Your next game is " + homeClubName + "(H) vs " + awayClubName + "(A) you can click this link to see it:\nhttps://footium.club/beta/tournaments/" + str(user[2]) + "/match/" + str(roundIndex) + "/" + str(i) + "\nand update tatics here:\nhttps://footium.club/beta/clubs/" + str(user[1]['id']) + "/tactics\nBest of luck")
                 elif liveMatch['matchTime'] == "1":
                     messageContent = ("Kick off at the " + stadiumName + "!!! This is bound to be a interesting battle between " + homeClubName + " and " + awayClubName)
                 elif liveMatch['matchTime'] == "HT":
