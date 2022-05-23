@@ -162,7 +162,7 @@ async def on_message(message):
                 print(user)
 
         if previous == False:
-            await message.reply("Thank you, "+ message.author.name + " ,you have signed up with club " + club['name'] + " in tournament " + str(tID) + "!!")
+            await message.reply("Thank you, "+ message.author.name + " ,you have signed up with club " + club['name'] + " , hold tight and wait for your match updates!!")
             sign_up = [message.author, club, tID]
             signed_up.append(sign_up)
 
