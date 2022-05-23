@@ -11,6 +11,8 @@ graphqlUrl = 'https://footium.club/beta/api/graphql'
 
 client = discord.Client()
 
+version = "0.1"
+
 signed_up = []
 
 getMatchDetails = """query getMatchDetails($tId: Int!, $rId: Int!, $fId: Int!) {
@@ -26,6 +28,7 @@ getMatchDetails = """query getMatchDetails($tId: Int!, $rId: Int!, $fId: Int!) {
     matchTime
     homeScorers
     awayScorers
+    stadiumName
   }
 }"""
 
@@ -71,12 +74,13 @@ async def myLoop():
             if liveMatch['params']['homeClub']['id'] == user[1]['id'] or user[1]['id'] == liveMatch['params']['awayClub']['id']:
                 homeClubName = getClubDetails(liveMatch['params']['homeClub']['id'])['name']
                 awayClubName = getClubDetails(liveMatch['params']['awayClub']['id'])['name']
+                stadiumName = getClubDetails(liveMatch['params']['homeClub']['id'])['stadiumName']
                 prevMessage = await user[0].dm_channel.history(limit=1).flatten()
                 messageContent = ""
                 if liveMatch['matchTime'] == "15:00":
-                    messageContent = ("Your next game is " + homeClubName + " vs " + awayClubName + " you can click this link to see it:\nhttps://footium.club/beta/tournaments/" + str(user[2]) + "/match/" + str(roundIndex) + "/" + str(i) + "\nand update tatics here:\nhttps://footium.club/beta/clubs/" + str(user[1]['id']) + "/tactics")
+                    messageContent = ("Your next game is " + homeClubName + "(H) vs " + awayClubName + "(A) you can click this link to see it:\nhttps://footium.club/beta/tournaments/" + str(user[2]) + "/match/" + str(roundIndex) + "/" + str(i) + "\nand update tatics here:\nhttps://footium.club/beta/clubs/" + str(user[1]['id']) + "/tactics")
                 elif liveMatch['matchTime'] == "1":
-                    messageContent = ("Kick off!!! This is bound to be a interesting battle between " + homeClubName + " and " + awayClubName)
+                    messageContent = ("Kick off at the " + stadiumName + "!!! This is bound to be a interesting battle between " + homeClubName + " and " + awayClubName)
                 elif liveMatch['matchTime'] == "HT":
                     messageContent = ("QUICK it's half time, the score is " + formatScore(homeClubName,liveMatch['homeScorers'],awayClubName,liveMatch['awayScorers']) + ", there still is time to update your tatics here:\nhttps://footium.club/beta/clubs/" + str(user[1]['id']) + "/tactics")
                 elif liveMatch['matchTime'] == "FT":
@@ -90,7 +94,7 @@ async def myLoop():
 
 @client.event
 async def on_ready():
-    print("{0.user} is online!".format(client))
+    print("{0.user} is online!".format(client) + "| v" + version + "|")
 
 @client.event
 async def on_message(message):
