@@ -74,7 +74,7 @@ async def myLoop():
             if liveMatch['params']['homeClub']['id'] == user[1]['id'] or user[1]['id'] == liveMatch['params']['awayClub']['id']:
                 homeClubName = getClubDetails(liveMatch['params']['homeClub']['id'])['name']
                 awayClubName = getClubDetails(liveMatch['params']['awayClub']['id'])['name']
-                stadiumName = getClubDetails(liveMatch['params']['homeClub']['id'])['stadiumName']
+                stadiumName = liveMatch['stadiumName']
                 prevMessage = await user[0].dm_channel.history(limit=1).flatten()
                 messageContent = ""
                 if liveMatch['matchTime'] == "15:00":
@@ -94,7 +94,7 @@ async def myLoop():
 
 @client.event
 async def on_ready():
-    print("{0.user} is online!".format(client) + "| v" + version + "|")
+    print("{0.user} is online!".format(client) + "| v" + version + " |")
 
 @client.event
 async def on_message(message):
