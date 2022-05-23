@@ -74,7 +74,7 @@ async def myLoop():
                 prevMessage = await user[0].dm_channel.history(limit=1).flatten()
                 messageContent = ""
                 if liveMatch['matchTime'] == "15:00":
-                    messageContent = ("https://footium.club/beta/tournaments/" + str(user[2]) + "/match/" + str(roundIndex) + "/" + str(i) + "\nhttps://footium.club/beta/clubs/" + str(user[1]['id']) + "/tactics")
+                    messageContent = ("Your next game is " + homeClubName + " vs " + awayClubName + " you can click this link to see it:\nhttps://footium.club/beta/tournaments/" + str(user[2]) + "/match/" + str(roundIndex) + "/" + str(i) + "\nand update tatics here:\n https://footium.club/beta/clubs/" + str(user[1]['id']) + "/tactics")
                 elif liveMatch['matchTime'] == "1":
                     messageContent = ("Kick off!!! This is bound to be a interesting battle between " + homeClubName + " and " + awayClubName)
                 elif liveMatch['matchTime'] == "HT":
