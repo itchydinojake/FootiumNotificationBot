@@ -6,12 +6,12 @@ from discord.ext import tasks
 import datetime
 from datetime import date
 
-TOKEN = os.getenv('DISCORD_TOKEN')
+TOKEN = os.getenv('DISCORD_TESTING_TOKEN')
 graphqlUrl = 'https://footium.club/beta/api/graphql'
 
 client = discord.Client()
 
-version = "0.2"
+version = "0.4"
 
 signed_up = []
 
@@ -64,7 +64,7 @@ async def myLoop():
             if r.status_code != 200:
                 # await message.channel.send("Error Checking api")
                 print(r.status_code)
-                quit()
+                return
 
             # loads data into python object
             data = json.loads(r.content)
@@ -86,7 +86,11 @@ async def myLoop():
                 elif liveMatch['matchTime'] == "FT":
                     messageContent = ("Quality Match, Final score of: " + formatScore(homeClubName,liveMatch['homeScorers'],awayClubName,liveMatch['awayScorers']))
                 else:
-                    messageContent = (liveMatch['matchTime'] + " | " + formatScore(homeClubName,liveMatch['homeScorers'],awayClubName,liveMatch['awayScorers']))
+                    if user['3'] == "g":
+                        await user[0].send("[UNFINISHED]")
+                        return
+                    elif int(liveMatch['matchTime']) % user[3] == 0:
+                        messageContent = (liveMatch['matchTime'] + " | " + formatScore(homeClubName,liveMatch['homeScorers'],awayClubName,liveMatch['awayScorers']))
                 if prevMessage[0].content == messageContent or messageContent == "":
                     pass
                 else:
@@ -104,9 +108,9 @@ async def on_message(message):
         return
     elif message.guild is not None:
         #message.channel.send("DM the bot ser!!")
-        await message.reply("DM the bot ser!!")
+        #await message.reply("DM the bot ser!!")
         return
-
+    frequency = 1
     # testing
     # print(message.author.name + " sent " + message.content)
     try:
@@ -117,7 +121,6 @@ async def on_message(message):
         if r.status_code != 200:
             print(r.status_code)
             await message.channel.send("Error Checking api, code:" + str(r.status_code))
-            # quit()
         elif r.status_code == 500:
             await message.channel.send("Not valid club ID")
 
@@ -127,6 +130,24 @@ async def on_message(message):
                 if user[0] == message.author:
                     signed_up.remove(user)
                     await message.reply("you have been un-subscribed from the bot!")
+            return
+        elif message.content.startswith('f=') == True:
+            #frequency = int()
+            #print(message.content[2:])
+            for user in signed_up:
+                if user[0] == message.author:
+                    if message.content[2:] == "g":
+                        await message.reply("you will only recieve goal updates [UNFINISHED]")
+                    else:
+                        try:
+                            if int(message.content[2:]) >= 90 or int(message.content[2:]) <= 0:
+                                await message.reply("invalid frequency")
+                                return
+                            else:
+                                user[3] = int(message.content[2:])
+                                await message.reply("you have updated the frequency of your bot to give updates every " + message.content[2:] + " (in game) match minutes!")
+                        except ValueError:
+                            await message.reply("invalid frequency")
             return
         else:
             await message.channel.send("Not valid club ID")
@@ -147,7 +168,7 @@ async def on_message(message):
         if r.status_code != 200:
             # await message.channel.send("Error Checking api")
             print(r.status_code)
-            quit()
+            return
 
         # loads data into python object
         data = json.loads(r.content)
@@ -162,8 +183,8 @@ async def on_message(message):
                 print(user)
 
         if previous == False:
-            await message.reply("Thank you, "+ message.author.name + " ,you have signed up with club " + club['name'] + " , hold tight and wait for your match updates!!")
-            sign_up = [message.author, club, tID]
+            await message.reply("Thank you, "+ message.author.name + " ,you have signed up with club " + club['name'] + " , hold tight and wait for your match updates!! You can now change the frequency of match updates by sending f= and a number representing how many in game match minutes the bot will wait between updates")
+            sign_up = [message.author, club, tID, frequency]
             signed_up.append(sign_up)
 
 def formatScore(homeTeam,homeScorers,awayTeam,awayScorers):
