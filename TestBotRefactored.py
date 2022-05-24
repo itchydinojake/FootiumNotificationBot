@@ -6,7 +6,7 @@ from discord.ext import tasks
 import datetime
 from datetime import date
 
-TOKEN = os.getenv('DISCORD_TESTING_TOKEN')
+TOKEN = os.getenv('DISCORD_TOKEN')
 graphqlUrl = 'https://footium.club/beta/api/graphql'
 
 client = discord.Client()
