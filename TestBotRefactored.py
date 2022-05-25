@@ -107,7 +107,7 @@ async def myLoop():
                     #else:
                     #    await user[0].send(messageContent)
                     ##except IndexError:
-                    print(str(user))
+                    #print(str(user))
                     #if int(liveMatch['matchTime'][:-1]) % user[3] == 0:
                     #        messageContent = (liveMatch['matchTime'] + " | " + formatScore(homeClubName,
                     #                                                                       liveMatch['homeScorers'],
@@ -214,11 +214,13 @@ async def on_message(message):
                 await message.reply("you have already signed up!! " + message.author.name + ", send a 'x' to remove your previous club subscription!")
                 previous = True
                 #signed_up.remove(user)
-                print(user)
+                #print(user)
 
         if previous == False:
+
             await message.reply("Thank you, "+ message.author.name + " ,you have signed up with club " + club['name'] + " , hold tight and wait for your match updates!! You can now change the frequency of match updates by sending f= and a number representing how many in game match minutes the bot will wait between updates")
             sign_up = [message.author, club, tID, frequency]
+            print("New sign up at " + str(datetime.time) + " of " + str(user))
             signed_up.append(sign_up)
 
 def formatScore(homeTeam,homeScorers,awayTeam,awayScorers):
