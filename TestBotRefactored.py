@@ -7,7 +7,7 @@ import datetime
 from datetime import date
 import pickle
 
-TOKEN = os.getenv('DISCORD_TOKEN')
+TOKEN = os.getenv('DISCORD_TESTING_TOKEN')
 graphqlUrl = 'https://footium.club/beta/api/graphql'
 
 client = discord.Client()
@@ -220,7 +220,7 @@ async def on_message(message):
 
             await message.reply("Thank you, "+ message.author.name + " ,you have signed up with club " + club['name'] + " , hold tight and wait for your match updates!! You can now change the frequency of match updates by sending f= and a number representing how many in game match minutes the bot will wait between updates")
             sign_up = [message.author, club, tID, frequency]
-            print("New sign up at " + str(datetime.time) + " of " + str(user))
+            print("New sign up at " + str(datetime.datetime.now()) + " of " + str(sign_up))
             signed_up.append(sign_up)
 
 def formatScore(homeTeam,homeScorers,awayTeam,awayScorers):
