@@ -5,13 +5,14 @@ import json
 from discord.ext import tasks
 import datetime
 from datetime import date
+import pickle
 
 TOKEN = os.getenv('DISCORD_TOKEN')
 graphqlUrl = 'https://footium.club/beta/api/graphql'
 
 client = discord.Client()
 
-version = "0.4"
+version = "0.5"
 
 signed_up = []
 
@@ -86,11 +87,32 @@ async def myLoop():
                 elif liveMatch['matchTime'] == "FT":
                     messageContent = ("Quality Match, Final score of: " + formatScore(homeClubName,liveMatch['homeScorers'],awayClubName,liveMatch['awayScorers']))
                 else:
-                    if user['3'] == "g":
-                        await user[0].send("[UNFINISHED]")
-                        return
-                    elif int(liveMatch['matchTime']) % user[3] == 0:
-                        messageContent = (liveMatch['matchTime'] + " | " + formatScore(homeClubName,liveMatch['homeScorers'],awayClubName,liveMatch['awayScorers']))
+                    messageContent = (liveMatch['matchTime'] + " | " + formatScore(homeClubName,liveMatch['homeScorers'],awayClubName,liveMatch['awayScorers']))
+                    #try:
+                    #if user[3] == "g":
+                    #    await user[0].send("[UNFINISHED]")
+                    #    return
+                        #if liveMatch['matchTime'][4] == '+':
+                        #    if int(liveMatch['matchTime'][:-1]) + int(liveMatch['matchTime'][:-1]) % user[3] == 0:
+
+                    #            messageContent = (liveMatch['matchTime'] + " | " + formatScore(homeClubName,
+                    #                                                                           liveMatch['homeScorers'],
+                    #                                                                           awayClubName, liveMatch[
+                    #                                                                               'awayScorers']))
+                    #elif int(liveMatch['matchTime'][:-1]) % user[3] == 0:
+                    #    messageContent = (liveMatch['matchTime'] + " | " + formatScore(homeClubName,
+                    #                                                                       liveMatch['homeScorers'],
+                    #                                                                       awayClubName,
+                    #                                                                       liveMatch['awayScorers']))
+                    #else:
+                    #    await user[0].send(messageContent)
+                    ##except IndexError:
+                    print(str(user))
+                    #if int(liveMatch['matchTime'][:-1]) % user[3] == 0:
+                    #        messageContent = (liveMatch['matchTime'] + " | " + formatScore(homeClubName,
+                    #                                                                       liveMatch['homeScorers'],
+                    #                                                                       awayClubName,
+                    #                                                                       liveMatch['awayScorers']))
                 if prevMessage[0].content == messageContent or messageContent == "":
                     pass
                 else:
@@ -99,6 +121,8 @@ async def myLoop():
 @client.event
 async def on_ready():
     print("{0.user} is online!".format(client) + "| v" + version + " |")
+    #loadSignedUp()
+    #print(str(signed_up))
 
 @client.event
 async def on_message(message):
@@ -132,12 +156,22 @@ async def on_message(message):
                     await message.reply("you have been un-subscribed from the bot!")
             return
         elif message.content.startswith('f=') == True:
+            await message.reply("this feature is currently broken")
             #frequency = int()
             #print(message.content[2:])
             for user in signed_up:
                 if user[0] == message.author:
                     if message.content[2:] == "g":
                         await message.reply("you will only recieve goal updates [UNFINISHED]")
+                        return
+                    elif message.content[2:] == "s":
+                        await message.reply("save users [not worinking]")
+                        #dumpSignedUp()
+                        #print("dumped")
+                        return
+                    elif message.content[2:] == "v":
+                        await message.reply(version)
+                        return
                     else:
                         try:
                             if int(message.content[2:]) >= 90 or int(message.content[2:]) <= 0:
@@ -213,6 +247,19 @@ def checkandupdateRoundIndex():
     #print(str((today-startDate).days))
     roundIndex = (today-startDate).days
     return roundIndex
+
+def loadSignedUp():
+    f = open("signups", "r")
+    signed_up = f.read()
+    print(signed_up)
+    #signed_up = json.loads(text)
+    #f = open("signups.txt", "w")
+    #f.write('')
+
+def dumpSignedUp():
+    f = open("signups", "a")
+    #json.dump(signed_up,f)
+    f.write(str(signed_up))
 
 myLoop.start()
 
