@@ -18,14 +18,7 @@ signed_up = []
 
 getMatchDetails = """query getMatchDetails($tId: Int!, $rId: Int!, $fId: Int!) {
   liveMatch(tournamentId: $tId, roundIndex: $rId, fixtureIndex: $fId) {
-    params {
-      homeClub {
-        id
-      }
-      awayClub {
-        id
-      }
-    }
+    state   
     matchTime
     homeScorers
     awayScorers
@@ -54,6 +47,7 @@ getTIDfromclubID = """
 async def myLoop():
     roundIndex = checkandupdateRoundIndex()
     #print(roundIndex)
+    #print(signed_up)
     for user in signed_up:
         #print(str(user))
         for i in range(0,6):
@@ -72,9 +66,9 @@ async def myLoop():
             liveMatch = data['data']['liveMatch']
 
             #print("home: "+ str(liveMatch['params']['homeClub']) + " VS " + str(user[1]) + " away: "+ str(liveMatch['params']['awayClub']['id'])+ " VS " + str(user[1]) )
-            if liveMatch['params']['homeClub']['id'] == user[1]['id'] or user[1]['id'] == liveMatch['params']['awayClub']['id']:
-                homeClubName = getClubDetails(liveMatch['params']['homeClub']['id'])['name']
-                awayClubName = getClubDetails(liveMatch['params']['awayClub']['id'])['name']
+            if liveMatch['state']['homeClubId'] == user[1]['id'] or user[1]['id'] == liveMatch['state']['awayClubId']:
+                homeClubName = getClubDetails(liveMatch['state']['homeClubId'])['name']
+                awayClubName = getClubDetails(liveMatch['state']['awayClubId'])['name']
                 stadiumName = liveMatch['stadiumName']
                 prevMessage = await user[0].dm_channel.history(limit=1).flatten()
                 messageContent = ""
@@ -87,24 +81,20 @@ async def myLoop():
                 elif liveMatch['matchTime'] == "FT":
                     messageContent = ("Quality Match, Final score of: " + formatScore(homeClubName,liveMatch['homeScorers'],awayClubName,liveMatch['awayScorers']))
                 else:
-                    messageContent = (liveMatch['matchTime'] + " | " + formatScore(homeClubName,liveMatch['homeScorers'],awayClubName,liveMatch['awayScorers']))
-                    #try:
-                    #if user[3] == "g":
-                    #    await user[0].send("[UNFINISHED]")
-                    #    return
-                        #if liveMatch['matchTime'][4] == '+':
-                        #    if int(liveMatch['matchTime'][:-1]) + int(liveMatch['matchTime'][:-1]) % user[3] == 0:
-
-                    #            messageContent = (liveMatch['matchTime'] + " | " + formatScore(homeClubName,
-                    #                                                                           liveMatch['homeScorers'],
-                    #                                                                           awayClubName, liveMatch[
-                    #                                                                               'awayScorers']))
-                    #elif int(liveMatch['matchTime'][:-1]) % user[3] == 0:
-                    #    messageContent = (liveMatch['matchTime'] + " | " + formatScore(homeClubName,
-                    #                                                                       liveMatch['homeScorers'],
-                    #                                                                       awayClubName,
-                    #                                                                       liveMatch['awayScorers']))
-                    #else:
+                    if user[3] == 1:
+                        messageContent = (liveMatch['matchTime'] + " | " + formatScore(homeClubName, liveMatch['homeScorers'],awayClubName,liveMatch['awayScorers']))
+                    else:
+                        #messageContent = (liveMatch['matchTime'] + " | " + formatScore(homeClubName,liveMatch['homeScorers'],awayClubName,liveMatch['awayScorers']))
+                        try:
+                        #if user[3] == "g":
+                        #    await user[0].send("[UNFINISHED]")
+                        #    return
+                            if liveMatch['matchTime'][3] == '+':
+                                if int(liveMatch['matchTime'][:1]) + int(liveMatch['matchTime'][-2:]) % user[3] == 0:
+                                    messageContent = (liveMatch['matchTime'] + " | " + formatScore(homeClubName,liveMatch['homeScorers'],awayClubName, liveMatch['awayScorers']))
+                        except IndexError:
+                            if int(liveMatch['matchTime'][:-1]) % user[3] == 0:
+                                messageContent = (liveMatch['matchTime'] + " | " + formatScore(homeClubName,liveMatch['homeScorers'],awayClubName,liveMatch['awayScorers']))
                     #    await user[0].send(messageContent)
                     ##except IndexError:
                     #print(str(user))
