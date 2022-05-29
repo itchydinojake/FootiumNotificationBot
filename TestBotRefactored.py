@@ -7,7 +7,7 @@ import datetime
 from datetime import date
 import pickle
 
-TOKEN = os.getenv('DISCORD_TESTING_TOKEN')
+TOKEN = os.getenv('DISCORD_TOKEN')
 graphqlUrl = 'https://footium.club/beta/api/graphql'
 
 client = discord.Client()
