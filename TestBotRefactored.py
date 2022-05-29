@@ -12,7 +12,7 @@ graphqlUrl = 'https://footium.club/beta/api/graphql'
 
 client = discord.Client()
 
-version = "0.5"
+version = "0.61"
 
 signed_up = []
 
@@ -69,6 +69,8 @@ async def myLoop():
             if liveMatch['state']['homeClubId'] == user[1]['id'] or user[1]['id'] == liveMatch['state']['awayClubId']:
                 homeClubName = getClubDetails(liveMatch['state']['homeClubId'])['name']
                 awayClubName = getClubDetails(liveMatch['state']['awayClubId'])['name']
+                homeScorers = [homeClubName,liveMatch['homeScorers']]
+                awayScorers = [awayClubName,liveMatch['awayScorers']]
                 stadiumName = liveMatch['stadiumName']
                 prevMessage = await user[0].dm_channel.history(limit=1).flatten()
                 messageContent = ""
@@ -77,22 +79,30 @@ async def myLoop():
                 elif liveMatch['matchTime'] == "1":
                     messageContent = ("Kick off at the " + stadiumName + "!!! This is bound to be a interesting battle between " + homeClubName + " and " + awayClubName)
                 elif liveMatch['matchTime'] == "HT":
-                    messageContent = ("QUICK it's half time, the score is " + formatScore(homeClubName,liveMatch['homeScorers'],awayClubName,liveMatch['awayScorers']) + ", there still is time to update your tatics here:\nhttps://footium.club/beta/clubs/" + str(user[1]['id']) + "/tactics")
+                    messageContent = ("QUICK it's   half time, the score is " + formatScore(homeClubName,homeScorers[1],awayClubName,awayScorers[1]) + ", there still is time to update your tatics here:\nhttps://footium.club/beta/clubs/" + str(user[1]['id']) + "/tactics")
                 elif liveMatch['matchTime'] == "FT":
-                    messageContent = ("Quality Match, Final score of: " + formatScore(homeClubName,liveMatch['homeScorers'],awayClubName,liveMatch['awayScorers']))
+                    messageContent = ("Quality Match, Final score of: " + formatScore(homeClubName,homeScorers[1],awayClubName,awayScorers[1]))
                 else:
                     if user[3] == 1:
-                        messageContent = (liveMatch['matchTime'] + " | " + formatScore(homeClubName, liveMatch['homeScorers'],awayClubName,liveMatch['awayScorers']))
+                        messageContent = (liveMatch['matchTime'] + " | " + formatScore(homeClubName,homeScorers[1],awayClubName,awayScorers[1]))
                     else:
                         #messageContent = (liveMatch['matchTime'] + " | " + formatScore(homeClubName,liveMatch['homeScorers'],awayClubName,liveMatch['awayScorers']))
                         try:
-                        #if user[3] == "g":
+                            #print("entered try")
+                            if user[3] == 'g':
+                                #print("g for" + str(user))
+                                ifGoalScoredData = checkIfGoalScore(homeScorers,awayScorers,liveMatch['matchTime'])
+                                #print(str(ifGoalScoredData))
+                                if ifGoalScoredData[0] == True:
+                                    #print("GOALs")
+                                    messageContent = ("GOOOOAL for " + ifGoalScoredData[1] + " at the " +liveMatch['matchTime'] + " by " + ifGoalScoredData[2] + "\nScore is currently " + formatScore(homeClubName,liveMatch['homeScorers'],awayClubName,liveMatch['awayScorers']))
                         #    await user[0].send("[UNFINISHED]")
                         #    return
-                            if liveMatch['matchTime'][3] == '+':
-                                if int(liveMatch['matchTime'][:1]) + int(liveMatch['matchTime'][-2:]) % user[3] == 0:
+                            elif liveMatch['matchTime'][3] == '+':
+                                if int(int(liveMatch['matchTime'][:1]) + int(liveMatch['matchTime'][-2:])) % user[3] == 0:
                                     messageContent = (liveMatch['matchTime'] + " | " + formatScore(homeClubName,liveMatch['homeScorers'],awayClubName, liveMatch['awayScorers']))
                         except IndexError:
+                            print("entered Index error")
                             if int(liveMatch['matchTime'][:-1]) % user[3] == 0:
                                 messageContent = (liveMatch['matchTime'] + " | " + formatScore(homeClubName,liveMatch['homeScorers'],awayClubName,liveMatch['awayScorers']))
                     #    await user[0].send(messageContent)
@@ -146,13 +156,14 @@ async def on_message(message):
                     await message.reply("you have been un-subscribed from the bot!")
             return
         elif message.content.startswith('f=') == True:
-            await message.reply("this feature is currently broken")
+            #await message.reply("this feature is currently broken")
             #frequency = int()
             #print(message.content[2:])
             for user in signed_up:
                 if user[0] == message.author:
                     if message.content[2:] == "g":
-                        await message.reply("you will only recieve goal updates [UNFINISHED]")
+                        await message.reply("you will only recieve goal updates [maybe working!]")
+                        user[3] = "g"
                         return
                     elif message.content[2:] == "s":
                         await message.reply("save users [not worinking]")
@@ -232,6 +243,22 @@ def getClubDetails(clubID):
     data = json.loads(r.content)
     club = data['data']['club']
     return club
+
+def checkIfGoalScore(homeScorers,awayScorers,matchTime):
+    #print(homeScorers)
+    if matchTime in homeScorers[1] or str(int(matchTime[:-1])+1) in homeScorers[1] or str(int(matchTime[:-1])-1) in homeScorers[1]:
+        homeScorersList = homeScorers[1].split(",")
+        for player in homeScorersList:
+            #print(player)
+            if matchTime in player:
+                return True, homeScorers[0],player.strip()
+    elif matchTime in awayScorers[1] or str(int(matchTime[:-1])+1) in awayScorers[1] or str(int(matchTime[:-1])-1) in awayScorers[1]:
+        awayScorersList = awayScorers[1].split(",")
+        for player in awayScorersList:
+            #print(player)
+            if matchTime in player:
+                return True, awayScorers[0], player.strip()
+    return False,"",""
 
 def checkandupdateRoundIndex():
     startDate = date(2022,5,12)
